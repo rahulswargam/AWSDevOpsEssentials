@@ -166,7 +166,7 @@ def send_status_email(build, last_50_lines, status):
     ses = boto3.client('ses')
     ses.send_email(
         Source=f"alert@{client_name}.streamlyne.org",
-        Destination={'ToAddresses': ['DevOps@streamlyne.org']},
+        Destination={'ToAddresses': ['your@email.com']},
         Message={
             'Subject': {'Data': subject},
             'Body': {'Text': {'Data': message}}

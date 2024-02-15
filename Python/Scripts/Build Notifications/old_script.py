@@ -18,7 +18,7 @@ def extract_environment_variable(build, key_name):
     return 'Unknown'
 
 def get_instance_config_from_s3(client_name, instance_type):
-    bucket_name = f"{client_name}-streamlyne-files-us-east-1"
+    bucket_name = f"{client_name}-bucket-files-us-east-1"
     s3_key = f"config/{instance_type}.json"
     s3 = boto3.client('s3')
     
@@ -165,7 +165,7 @@ def send_notification_to_teams(build, build_status, webhook_url, base64_image, a
                                 "text": f"<at>{aad_id}</at>",
                                 "mentioned": {
                                     "id": aad_id,
-                                    "name": "Janior"
+                                    "name": "Name"
                                 }
                             }
                         ]
@@ -251,6 +251,6 @@ def lambda_handler(event, context):
         'body': "Notification Sent."
     }
 
-aad_id = 'f34efb9a'
+aad_id = 'fefb9a'
 s3_bucket = 'cicd-python-files'
-webhook_url = 'https://vivantech.webhook.office.com/webhookb2/8cd21dc6-62ae-47e5-9772-259fdaf5c708@9794d907-c605-4910-9050-02b9980d3e7a/IncomingWebhook/806301631f9347b7aa58b7447904638c/b3691802-f075-45f0-9e42-47b02642f96c'
+webhook_url = 'webhook_url'
