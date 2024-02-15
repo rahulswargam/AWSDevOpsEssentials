@@ -1,0 +1,47 @@
+These need to be done in this exact order
+1. Write a python script that updates the files/project.json file. See below logic.
+            "python update_source_version.py CLIENT_NAME INSTANCE_TYPE NEW_SOURCE_VERSION"
+            example:  python update_source_version.py dev report 2_61_0_rc
+            "python update_source_version.py PROJECT_TYPE NEW_SOURCE_VERSION"
+            example:  python update_source_version.py internal 2_61_0_rc
+2. Commit/push changes into master branch when you're done with #1 above
+3. Add a new environment variable to the codebuild.tf file called AUTO_SHUTDOWN. Set it to default to true for all builds.
+4. Commit/push changes into master branch when you're done with #3 above
+5. Pull the latest changes from master and create a branch off that. Add in Terraform code that ONLY does the following:
+    If any of build projects Fail or is Stopped -> email needs to be sent to DevOps@streamlyne.org email
+6. When you're done with #5 above, ping Jay before commit/push into Master for review
+
+create documentation for the update_source_version.py script
+only send success email if previous build failed
+
+
+3. Only build notifications from SS app go into MS Teams channel - just the SUCCESS/FAILURE ones
+5. Update the buildspecs to actually do things
+6. Update internal buildspec so that if the instance type is mock, it runs a destroy afterwards
+7. Update production buildspec to match internal one with slight modifications
+8. set up schedules as lambda functions ran at certain cron expressions:
+    for mock - CRON - is there a way to run randomly during business hours of 0700 EST -> 1900 EST:
+        Filter through list of codebuild projects to extract only the mock instances
+        pick a random one from the list of mock instances 
+        deploy
+
+    for support - CRON - every friday at midnight EST:
+        we need to store the AUTO_SHUTDOWN_ENABLED variable inside the build project env variables, update codebuild tf - default should be set to true
+        Filter through list of codebuild projects to extract only the support instances
+        run a terraform destroy on them
+            - how would we run a destroy on them? buildspec doesnt have this command.
+    
+    for s2s/test:
+        everyday at 7 am eastern, redeploy s2s and test instances
+    
+    for CUSTOM clients (ku training/uasys training) - CRON, quarterly available???:
+        Filter through list of codebuild projects to extract only the related instances
+        Run the build
+
+9. Update Jenkins page (jenkins.py) logic for auto shutdown enable/disable to update the ENV variable on the overall build project instead of jenkins
+10. This build will begin automatically in 5 minutes if no action is taken., write a management command that runs at intervals
+    - if build is not approved and not declined and request timestamp is more than 5 minutes old, start the build via codebuild
+    - make sure to post a teams message about the auto deployment after starting the build
+
+eventually also need to:
+recreate the sl-release-redeploy for codebuild

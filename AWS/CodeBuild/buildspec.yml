@@ -1,0 +1,55 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: latest
+      python: latest
+  pre_build:
+    commands:
+      - echo Nothing to do in the pre_build phase...
+      - echo configure aws keys..
+      - aws configure set aws_access_key_id "$BUILDSPEC_AWS_ACCESS_KEY_ID"
+      - aws configure set aws_secret_access_key "$BUILDSPEC_AWS_SECRET_ACCESS_KEY"
+      - aws configure set region "$AWS_REGION"
+      - aws configure set output "$TEXT"
+      - echo "Creating pip.conf directory..."
+      - mkdir -p ~/.config/pip/
+      - echo "Creating pip.conf file..."
+      - echo "Setting [global] configurations in pip.conf..."
+      - echo "[global]" > ~/.config/pip/pip.conf
+      - echo "index-url = https://rswargam:MjsG2ADMkTRQ@nexus.dev.streamlyne.org/repository/python-packages/simple" >> ~/.config/pip/pip.conf
+      - echo "trusted-host = nexus.dev.streamlyne.org pypi.org" >> ~/.config/pip/pip.conf
+      - echo "extra-index-url= https://pypi.org/simple" >> ~/.config/pip/pip.conf
+      - echo "" >> ~/.config/pip/pip.conf
+      - echo "Setting [nexus] configurations in pip.conf..."
+      - echo "[nexus]" >> ~/.config/pip/pip.conf
+      - echo "repository = https://nexus.dev.streamlyne.org/repository/python-packages/" >> ~/.config/pip/pip.conf
+      - echo "username = rswargam" >> ~/.config/pip/pip.conf
+      - echo "password = MjsG2ADMkTRQ" >> ~/.config/pip/pip.conf
+      - pip3 install streamlyne-tools
+      - pip3 install --upgrade streamlyne-tools
+      - python3 -m pip install --upgrade pip
+      - echo "Installing Terraform..."
+      - mkdir tf-doc
+      - ls
+      - curl -o terraform.zip https://releases.hashicorp.com/terraform/0.14.2/terraform_0.14.2_linux_amd64.zip
+      - yum install -y unzip
+      - ls
+      - unzip -o terraform.zip -d tf-doc/
+      - mv tf-doc/terraform /usr/local/bin/
+      - terraform --version
+  build:
+    commands:
+      - echo Build started on `date`
+      - cd terraform/ci_scripts
+      - ls
+      - chmod +x *.sh
+      - |
+        if [[ ("$TAINT_TASK_DEF" == "true" && "$RECREATE_SOURCE_DB_SNAPSHOT" == "true") || 
+        ("$TAINT_TASK_DEF" != "true" && "$RECREATE_SOURCE_DB_SNAPSHOT" != "true") ]]; then
+        ./instance_plan.sh
+        fi
+  post_build:
+    commands:
+      - echo Build completed on `date`
